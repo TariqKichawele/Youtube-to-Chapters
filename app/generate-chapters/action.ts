@@ -3,6 +3,7 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 import { validateYoutubeUrl } from "@/utils/validation";
+import { getVideoId } from "@/utils/youtube";
 
 type GenerateChaptersResponse = {
     success: boolean;
@@ -25,5 +26,13 @@ export async function generateChapters(formData: FormData): Promise<GenerateChap
         return { success: false, error: "Invalid link" }
     }
 
+    const videoId = await getVideoId(link);
+    if(!videoId) {
+        return { success: false, error: "Failed to get video ID" }
+    }
+
+
+
 
 }
+
