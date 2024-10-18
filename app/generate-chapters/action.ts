@@ -6,17 +6,34 @@ import { validateYoutubeUrl } from "@/utils/validation";
 import { getVideoDetails, getVideoId, getVideoTranscript } from "@/utils/youtube";
 import { parseXMLContent } from "@/utils/parsing";
 import { generateChaptersWithAI } from "@/utils/openai";
+import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 type GenerateChaptersResponse = {
     success: boolean;
     error?: string;
-    data?: any;
+    data?: {
+        title: string;
+        content: string[];
+        userId: string;
+        id: string;
+        createdAt: Date;
+    }
 }
 
 export async function generateChapters(formData: FormData): Promise<GenerateChaptersResponse> {
     const session = await getServerSession(authOptions);
     if(!session?.user?.email) {
         return { success: false, error: "Authentication required" }
+    }
+
+    const userDB = await prisma.user.findFirst({
+        where: {
+            email: session.user.email
+        }
+    });
+    if(!userDB) {
+        return { success: false, error: "User not found" }
     }
 
     const link = formData.get("link") as string;
@@ -63,10 +80,17 @@ export async function generateChapters(formData: FormData): Promise<GenerateChap
         return { success: false, error: "Failed to generate chapters" }
     }
 
-    
+    const savedChaptersToDatabase = await prisma.chapterSet.create({
+        data: {
+            title: videoDetails.title,
+            content: openAIChapters,
+            userId: userDB.id
+        }
+    });
 
+    revalidatePath('/dashboard');
 
-
+    return { success: true, data: savedChaptersToDatabase }
 
 }
 
