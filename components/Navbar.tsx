@@ -4,18 +4,18 @@ import Link from 'next/link'
 import { Button } from './ui/button'
 import { MenuIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
-import { Session } from 'next-auth';
+import { getServerSession, Session } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-  
 interface NavItemProps {
-    href: string;
-    label: string;
-    mobile?: boolean;
+  href: string;
+  label: string;
+  mobile?: boolean;
 }
 
 interface NavItemsProps {
-    session: Session | null;
-    mobile?: boolean;
+  session: Session | null;
+  mobile?: boolean;
 }
   
 interface MobileNavProps {
@@ -102,8 +102,8 @@ const MobileNav: React.FC<MobileNavProps> = ({ session }) => {
 };
   
 
-const Navbar = () => {
-    const session = null;
+const Navbar = async() => {
+    const session: Session | null = await getServerSession(authOptions) 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop=filter]:bg-background/60">
         <MaxWidthWrapper>
