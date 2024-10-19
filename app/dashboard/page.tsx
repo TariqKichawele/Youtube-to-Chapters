@@ -8,6 +8,7 @@ import { buttonVariants } from '@/components/ui/button';
 import prisma from '@/lib/prisma';
 import Header from '@/components/Header';
 import ChaptersWrapper from '@/components/ChaptersWrapper';
+import { createCheckoutLink, createCustomerIfNull, generateCustomerPortalLink, hasSubscription } from '@/utils/stripe';
 
 const Dashboard = async() => {
     const session = await getServerSession(authOptions);
@@ -15,7 +16,9 @@ const Dashboard = async() => {
         return redirect('/signin');
     }
 
-    const subscribed = null;
+    await createCustomerIfNull();
+
+    const subscribed = await hasSubscription();
 
     const user = await prisma.user.findFirst({
         where: {
@@ -23,8 +26,12 @@ const Dashboard = async() => {
         },
         select: {
             savedChapters: true,
+            stripe_customer_id: true
         }
     });
+
+    const manage_link = await generateCustomerPortalLink("" + user?.stripe_customer_id);;
+    const checkout_link = await createCheckoutLink("" + user?.stripe_customer_id);
 
     const isEligible = false;
     const message = 'Hello';
@@ -33,9 +40,9 @@ const Dashboard = async() => {
         <div className="flex flex-col gap-4 mt-12">
             <div className="flex flex-row justify-between items-center">
                 <Header text={`👋 Hello, ${session?.user?.name || "User"}`} />
-                {subscribed && (
+                {subscribed.isSubscribed && (
                     <Link
-                        href={'/'}
+                        href={'' + manage_link}
                         className={buttonVariants({
                             variant: "outline",
                             className: "w-48",
@@ -44,9 +51,9 @@ const Dashboard = async() => {
                         Manage subscription
                     </Link>
                 )}
-                {!subscribed && (
+                {!subscribed.isSubscribed && (
                     <Link
-                        href={'/'}
+                        href={'' + checkout_link}
                         className={buttonVariants({
                             variant: "default",
                             className: "w-48",

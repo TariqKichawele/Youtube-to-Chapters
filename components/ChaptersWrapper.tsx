@@ -1,7 +1,7 @@
 'use client'
 
 import { ChapterSet } from '@prisma/client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaSadTear } from 'react-icons/fa';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { 
@@ -14,6 +14,7 @@ import {
 } from './ui/pagination';
 import { Copy, Check } from 'lucide-react';
 import { Button } from './ui/button';
+import Clipboard from 'clipboard';
 
 interface ChapterWrapperProps {
     user: {
@@ -32,6 +33,44 @@ const ChaptersWrapper = ({ user }: ChapterWrapperProps) => {
     const endIndex = startIndex + ITEMS_PER_PAGE
     const currentChapters = user.savedChapters.slice(startIndex, endIndex)
     const totalPages = Math.ceil(user.savedChapters.length / ITEMS_PER_PAGE);
+
+    const clipboard = new Clipboard('.btn-copy');
+
+    useEffect(() => {
+        clipboard.on('success', (e) => {
+            setCopiedId(e.trigger.id);
+            setTimeout(() => {
+                setCopiedId(null);
+            }, 2000);
+            e.clearSelection();
+        });
+
+        return () => clipboard.destroy();
+    }, []);
+
+    useEffect(() => {
+        const style = document.createElement('style');
+        style.textContent = `
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }    
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        `;
+        document.head.appendChild(style);
+        return () => {
+            document.head.removeChild(style);
+        }
+    }, [])
 
   return (
     <div className="mt-12 min-h-screen">
@@ -100,13 +139,11 @@ const ChaptersWrapper = ({ user }: ChapterWrapperProps) => {
         <Pagination className="mt-8">
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                className={
-                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                }
-              />
+                <PaginationPrevious
+                    href="#"
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    className={ currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                />
             </PaginationItem>
             {[...Array(totalPages)].map((_, index) => (
               <PaginationItem key={index}>
@@ -119,17 +156,11 @@ const ChaptersWrapper = ({ user }: ChapterWrapperProps) => {
               </PaginationItem>
             ))}
             <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                }
-                className={
-                  currentPage === totalPages
-                    ? "pointer-events-none opacity-50"
-                    : ""
-                }
-              />
+                <PaginationNext
+                    href="#"
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                />
             </PaginationItem>
           </PaginationContent>
         </Pagination>
