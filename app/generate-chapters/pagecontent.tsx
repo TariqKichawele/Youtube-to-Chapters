@@ -6,10 +6,18 @@ import Image from 'next/image'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 import SubmitButton from '@/components/SubmitButton'
+import { generateChapters } from './action'
+import { useRouter } from 'next/navigation'
 
 const PageContent = () => {
-    const handleSubmit = (formData: FormData) => {
-        console.log(formData)
+  const router = useRouter();
+    const handleSubmit = async(formData: FormData) => {
+        const res = await generateChapters(formData);
+        if(res.success) {
+          router.push('/dashboard')
+        } else {
+          alert(res.error)
+        }
     }
   return (
     <>

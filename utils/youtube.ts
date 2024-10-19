@@ -51,6 +51,6 @@ export async function getVideoTranscript(videoId: string): Promise<SubtitlesResp
         throw new Error("Video ID is required");
     }
 
-    return fetchFromYoutubeApi<SubtitlesResponse>("video/subtitles", { videoId });
+    return fetchFromYoutubeApi<SubtitlesResponse>("subtitles", { videoId });
 }
 
