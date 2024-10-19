@@ -17,7 +17,7 @@ const pricingOptions = [
       title: "Free",
       price: "$0",
       description: "Perfect for getting started",
-      features: ["5 chapter generations per month", "Basic support"],
+      features: ["10 chapter generations per month", "Basic support"],
       limitations: ["No access to premium features"],
       buttonText: "Get started",
       popular: false,

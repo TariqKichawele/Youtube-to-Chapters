@@ -8,9 +8,15 @@ import { buttonVariants } from '@/components/ui/button';
 import prisma from '@/lib/prisma';
 import Header from '@/components/Header';
 import ChaptersWrapper from '@/components/ChaptersWrapper';
-import { createCheckoutLink, createCustomerIfNull, generateCustomerPortalLink, hasSubscription } from '@/utils/stripe';
+import { 
+    checkChapterCreationEligibilty,
+    createCheckoutLink, 
+    createCustomerIfNull, 
+    generateCustomerPortalLink, 
+    hasSubscription 
+} from '@/utils/stripe';
 
-const Dashboard = async() => {
+const Dashboard = async () => {
     const session = await getServerSession(authOptions);
     if(!session || !session.user?.email) {
         return redirect('/signin');
@@ -33,8 +39,8 @@ const Dashboard = async() => {
     const manage_link = await generateCustomerPortalLink("" + user?.stripe_customer_id);;
     const checkout_link = await createCheckoutLink("" + user?.stripe_customer_id);
 
-    const isEligible = false;
-    const message = 'Hello';
+    const { isEligible, message } = await checkChapterCreationEligibilty();
+
   return (
     <MaxWidthWrapper>
         <div className="flex flex-col gap-4 mt-12">
@@ -42,7 +48,7 @@ const Dashboard = async() => {
                 <Header text={`👋 Hello, ${session?.user?.name || "User"}`} />
                 {subscribed.isSubscribed && (
                     <Link
-                        href={'' + manage_link}
+                        href={"" + manage_link}
                         className={buttonVariants({
                             variant: "outline",
                             className: "w-48",
@@ -67,7 +73,12 @@ const Dashboard = async() => {
             {!isEligible && message}
         </div>
         <ChaptersWrapper 
-            user={user && { savedChapters: user.savedChapters }}
+            user={user ? { 
+                savedChapters: user.savedChapters,
+                stripe_customer_id: user.stripe_customer_id || ""
+            } : {
+                 savedChapters: [], stripe_customer_id: ""
+            }} 
         />
     </MaxWidthWrapper>
   )

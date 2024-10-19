@@ -19,6 +19,7 @@ import Clipboard from 'clipboard';
 interface ChapterWrapperProps {
     user: {
         savedChapters: ChapterSet[];
+        stripe_customer_id: string;
     }
 }
 
