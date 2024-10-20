@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import Stripe from 'stripe';
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -15,6 +15,8 @@ interface StripeSubscription {
     created: number;
 }
 
+
+// Check if the user has a subscription
 export async function hasSubscription(): Promise<{
     isSubscribed: boolean;
     subscriptionData: StripeSubscription[];
@@ -51,10 +53,11 @@ export async function hasSubscription(): Promise<{
     }
 }
 
+// Create a checkout session
 export async function createCheckoutLink(customer: string) {
     const checkout = await stripe.checkout.sessions.create({
-        success_url: `${process.env.NEXTAUTH_URL}/dashboard&success=true`,
-        cancel_url: `${process.env.NEXTAUTH_URL}/dashboard&success=false`,
+        success_url: `${process.env.NEXTAUTH_URL}/dashboard`,
+        cancel_url: `${process.env.NEXTAUTH_URL}/dashboard`,
         customer: customer,
         line_items: [
             {
@@ -68,6 +71,8 @@ export async function createCheckoutLink(customer: string) {
     return checkout.url
 }
 
+
+// Create a portal session
 export async function generateCustomerPortalLink(customerId: string) {
     try {
         const portalSession = await stripe.billingPortal.sessions.create({
@@ -81,6 +86,8 @@ export async function generateCustomerPortalLink(customerId: string) {
     }
 }
 
+
+// Create a customer
 export async function createCustomerIfNull() {
     const session = await getServerSession(authOptions);
 
@@ -204,8 +211,8 @@ export async function checkChapterCreationEligibilty(): Promise<{
     return {
         isEligible: true,
         message: `
-        You have ${remainingGenerations} chapter generation${ remainingGenerations !== 1 ? "s" : ""} remaining for 
-        this ${isSubscribed ? "billing cycle" : "month"}
+            You have ${remainingGenerations} chapter generation${ remainingGenerations !== 1 ? "s" : ""} remaining for 
+            this ${isSubscribed ? "billing cycle" : "month"}
         `,
         remainingGenerations: remainingGenerations
     }

@@ -76,7 +76,7 @@ const Footer = () => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              AlfieWebDev
+              Tariq Kichawele
             </Link>
           </p>
         </div>

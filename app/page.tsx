@@ -79,14 +79,14 @@ export default function Home() {
       <div className="bg-gradient-to-b from-background to-secondary/20 py-20 md:py-28">
         <MaxWidthWrapper>
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-4">Built by AlfredWebDev</h2>
+            <h2 className="text-3xl font-bold mb-4">Built by Tariq Kichawele</h2>
             <p className="text-xl text-muted-foreground">
               Crafted with passion and expertise
             </p>
           </div>
           <div className="mt-10 relative max-w-3xl mx-auto">
             <Image
-              src="/banner.png"
+              src="https://res.cloudinary.com/damqrrryq/image/upload/v1727349411/pexels-divinetechygirl-1181244_tlg3ic.jpg"
               width={800}
               height={450}
               alt="demo image"

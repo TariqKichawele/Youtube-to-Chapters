@@ -1,7 +1,7 @@
 'use server'
 
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "../api/auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth";
 import { validateYoutubeUrl } from "@/utils/validation";
 import { getVideoDetails, getVideoId, getVideoTranscript } from "@/utils/youtube";
 import { parseXMLContent } from "@/utils/parsing";

@@ -5,7 +5,7 @@ import { Button } from './ui/button'
 import { MenuIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { getServerSession, Session } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
 interface NavItemProps {
   href: string;
