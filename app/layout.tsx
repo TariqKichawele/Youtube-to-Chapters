@@ -16,7 +16,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Youtube to Chapters",
+  title: "Youtube-to-Chapters",
   description: "Generate timestamps for your YouTube videos.",
 };
 
