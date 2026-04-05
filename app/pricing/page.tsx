@@ -1,116 +1,169 @@
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import React from 'react'
-import { 
-    Card, 
-    CardHeader, 
-    CardTitle, 
-    CardDescription, 
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardDescription,
     CardContent,
-    CardFooter 
-} from '@/components/ui/card'; 
+    CardFooter
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckIcon, XIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+import {
+    createCheckoutLink,
+    createCustomerIfNull,
+    generateCustomerPortalLink,
+    hasSubscription
+} from '@/utils/stripe';
 
 const pricingOptions = [
     {
-      title: "Free",
-      price: "$0",
-      description: "Perfect for getting started",
-      features: ["10 chapter generations per month", "Basic support"],
-      limitations: ["No access to premium features"],
-      buttonText: "Get started",
-      popular: false,
+        title: "Free",
+        price: "$0",
+        description: "Perfect for getting started",
+        features: ["10 chapter generations per month", "Basic support"],
+        limitations: ["No access to premium features"],
+        buttonText: "Get started",
+        popular: false,
     },
     {
-      title: "Pro plan",
-      price: "$5",
-      description: "For regular uploaders",
-      features: ["40 chapter generations per month", "Priority support"],
-      limitations: [],
-      buttonText: "Upgrade now",
-      popular: true,
+        title: "Pro plan",
+        price: "$5",
+        description: "For regular uploaders",
+        features: ["40 chapter generations per month", "Priority support"],
+        limitations: [],
+        buttonText: "Upgrade now",
+        popular: true,
     },
 ];
 
-const Pricing = () => {
-  return (
-    <MaxWidthWrapper className="py-24 min-h-screen bg-gradient-to-b from-background to-secondary/20">
-      <div className="max-w-2xl mx-auto text-center mb-16">
-        <h2 className="text-4xl font-bold mb-4">Simple, transparent pricing</h2>
-        <p className="text-xl text-muted-foreground">
-          Choose the plan that works best for you. No hidden fees. Fair pricing.
-        </p>
-        <p className="text-xl text-muted-foreground">
-          *Maximum video length is 1 hour for all plans*
-        </p>
-      </div>
-      <div className="flex justify-center items-center text-2xl font-bold mb-12">
-        <span className="bg-primary/10 text-primary px-4 py-2 rounded-full">
-          Billed monthly
-        </span>
-      </div>
-      <div className="grid md:grid-cols-2 gap-8 lg:gap-12 lg:items-stretch">
-        {pricingOptions.map((option, index) => (
-          <Card
-            key={index}
-            className={`relative overflow-hidden transition-all duration-300 ${
-              option.popular
-                ? "border-primary shadow-lg hover:shadow-xl"
-                : "hover:border-primary/50 hover:shadow-md"
-            }`}
-          >
-            {option.popular && (
-              <div className="absolute top-0 right-0">
-                <Badge className="m-2 py-1.5 uppercase bg-primary text-primary-foreground">
-                  Most popular
-                </Badge>
-              </div>
-            )}
-            <CardHeader className="text-center pb-8 pt-10">
-              <CardTitle className="text-3xl font-bold mb-2">
-                {option.title}
-              </CardTitle>
-              <span className="text-5xl font-extrabold">{option.price}</span>
-              {option.price !== "Free" && (
-                <span className="text-xl text-muted-foreground">/month</span>
-              )}
-            </CardHeader>
-            <CardDescription className="text-center px-4 pb-4">
-              {option.description}
-            </CardDescription>
-            <CardContent>
-              <ul className="space-y-4 mb-8">
-                {option.features.map((feature, index) => (
-                  <li key={index} className="flex items-center">
-                    <CheckIcon className="w-4 h-4 mr-2 text-primary" />
-                    {feature}
-                  </li>
+const Pricing = async () => {
+    const session = await getServerSession(authOptions);
+
+    const freeHref = session?.user?.email
+        ? "/generate-chapters"
+        : "/signin?callbackUrl=/generate-chapters";
+
+    let proHref = "/signin?callbackUrl=/pricing";
+    let proButtonText = "Upgrade now";
+
+    if (session?.user?.email) {
+        await createCustomerIfNull();
+        const user = await prisma.user.findFirst({
+            where: { email: session.user.email },
+            select: { stripe_customer_id: true },
+        });
+        const subscribed = await hasSubscription();
+
+        if (user?.stripe_customer_id) {
+            if (subscribed.isSubscribed) {
+                const portalUrl = await generateCustomerPortalLink(
+                    "" + user.stripe_customer_id
+                );
+                if (portalUrl) {
+                    proHref = portalUrl;
+                    proButtonText = "Manage subscription";
+                }
+            } else {
+                const checkoutUrl = await createCheckoutLink(
+                    "" + user.stripe_customer_id
+                );
+                if (checkoutUrl) {
+                    proHref = checkoutUrl;
+                }
+            }
+        }
+    }
+
+    return (
+        <MaxWidthWrapper className="py-24 min-h-screen bg-gradient-to-b from-background to-secondary/20">
+            <div className="max-w-2xl mx-auto text-center mb-16">
+                <h2 className="text-4xl font-bold mb-4">Simple, transparent pricing</h2>
+                <p className="text-xl text-muted-foreground">
+                    Choose the plan that works best for you. No hidden fees. Fair pricing.
+                </p>
+                <p className="text-xl text-muted-foreground">
+                    *Maximum video length is 1 hour for all plans*
+                </p>
+            </div>
+            <div className="flex justify-center items-center text-2xl font-bold mb-12">
+                <span className="bg-primary/10 text-primary px-4 py-2 rounded-full">
+                    Billed monthly
+                </span>
+            </div>
+            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 lg:items-stretch">
+                {pricingOptions.map((option, index) => (
+                    <Card
+                        key={index}
+                        className={`relative overflow-hidden transition-all duration-300 ${
+                            option.popular
+                                ? "border-primary shadow-lg hover:shadow-xl"
+                                : "hover:border-primary/50 hover:shadow-md"
+                        }`}
+                    >
+                        {option.popular && (
+                            <div className="absolute top-0 right-0">
+                                <Badge className="m-2 py-1.5 uppercase bg-primary text-primary-foreground">
+                                    Most popular
+                                </Badge>
+                            </div>
+                        )}
+                        <CardHeader className="text-center pb-8 pt-10">
+                            <CardTitle className="text-3xl font-bold mb-2">
+                                {option.title}
+                            </CardTitle>
+                            <span className="text-5xl font-extrabold">{option.price}</span>
+                            {option.price !== "Free" && (
+                                <span className="text-xl text-muted-foreground">/month</span>
+                            )}
+                        </CardHeader>
+                        <CardDescription className="text-center px-4 pb-4">
+                            {option.description}
+                        </CardDescription>
+                        <CardContent>
+                            <ul className="space-y-4 mb-8">
+                                {option.features.map((feature, featureIndex) => (
+                                    <li key={featureIndex} className="flex items-center">
+                                        <CheckIcon className="w-4 h-4 mr-2 text-primary shrink-0" />
+                                        {feature}
+                                    </li>
+                                ))}
+                                {option.limitations?.map((limitation, limIndex) => (
+                                    <li key={limIndex} className="flex items-center">
+                                        <XIcon className="w-4 h-4 mr-2 text-red-500 shrink-0" />
+                                        {limitation}
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                        <CardFooter>
+                            {option.popular ? (
+                                <Button
+                                    className="w-full py-6 text-lg bg-primary hover:bg-primary/90"
+                                    asChild
+                                >
+                                    <Link href={proHref}>{proButtonText}</Link>
+                                </Button>
+                            ) : (
+                                <Button
+                                    className="w-full py-6 text-lg bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                                    asChild
+                                >
+                                    <Link href={freeHref}>{option.buttonText}</Link>
+                                </Button>
+                            )}
+                        </CardFooter>
+                    </Card>
                 ))}
-                {option.limitations?.map((limitation, index) => (
-                  <li key={index} className="flex items-center">
-                    <XIcon className="w-4 h-4 mr-2 text-red-500" />
-                    {limitation}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-            <CardFooter>
-              <Button
-                className={`w-full py-6 text-lg ${
-                  option.popular
-                    ? "bg-primary hover:bg-primary/90"
-                    : "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                }`}
-              >
-                {option.buttonText} (You must be logged in)
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
-    </MaxWidthWrapper>
-  )
+            </div>
+        </MaxWidthWrapper>
+    )
 }
 
 export default Pricing

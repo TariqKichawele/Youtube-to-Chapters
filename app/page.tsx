@@ -1,10 +1,15 @@
 import Link from "next/link";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { ChevronRightIcon, PlayCircle } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession(authOptions);
+  const getStartedHref = session ? "/generate-chapters" : "/signin";
+
   return (
     <div className="overflow-hidden">
       <MaxWidthWrapper>
@@ -18,7 +23,7 @@ export default function Home() {
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
-              href="/signin"
+              href={getStartedHref}
               className={buttonVariants({
                 variant: "default",
                 size: "lg",
@@ -68,12 +73,6 @@ export default function Home() {
               </div>
             );
           })}
-          <div className="col-span-full flex justify-center mt-24">
-            <Button variant="outline" size="lg">
-              <PlayCircle className="mr-2 h-6 w-6" />
-              Watch demo
-            </Button>
-          </div>
         </div>
       </MaxWidthWrapper>
       <div className="bg-gradient-to-b from-background to-secondary/20 py-20 md:py-28">

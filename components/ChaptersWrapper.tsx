@@ -91,14 +91,14 @@ const ChaptersWrapper = ({ user }: ChapterWrapperProps) => {
           {currentChapters.map((chapter: ChapterSet) => (
             <div
               key={chapter.id}
-              className="border border-gray-200 rounded-md p-4 flex flex-col h-[250px] overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300"
+              className="border border-gray-200 rounded-lg p-5 flex flex-col min-h-[300px] max-h-[min(32rem,70vh)] shadow-sm hover:shadow-md transition-shadow duration-300"
             >
-              <h2 className="text-lg font-semibold mb-2 truncate h-16">
+              <h2 className="shrink-0 text-lg font-semibold leading-snug text-foreground mb-4 break-words">
                 {chapter.title}
               </h2>
-              <div className="flex-grow overflow-y-auto custom-scrollbar pr-2">
+              <div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar pr-2 pb-1">
                 {chapter.content.map((line: string, index: number) => (
-                  <p key={index} className="text-sm text-gray-600 mb-1">
+                  <p key={index} className="text-sm text-gray-600 leading-relaxed mb-1.5 last:mb-0">
                     {line}
                   </p>
                 ))}
@@ -107,8 +107,7 @@ const ChaptersWrapper = ({ user }: ChapterWrapperProps) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      value={"outline"}
-                      className={`w-full flex justify-center items-center space-x-2 btn-copy ${
+                      className={`mt-4 w-full shrink-0 flex justify-center items-center space-x-2 btn-copy ${
                         copiedId === chapter.id ? "bg-green-500" : ""
                       }`}
                       variant={"outline"}
