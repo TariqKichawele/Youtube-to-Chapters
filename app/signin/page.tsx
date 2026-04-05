@@ -24,7 +24,7 @@ const SignIn = () => {
             </div>
         </div>
         <div className="w-full p-4 lg:p-8">
-            <div className="mx-auto flex w-full flex-col justify-centr space-y-4 sm:w-[350px]">
+            <div className="mx-auto flex w-full flex-col justify-center space-y-4 sm:w-[350px]">
                 <Button
                     className="p-4 w-full text-base font-semibold flex items-center justify-center"
                     style={{
