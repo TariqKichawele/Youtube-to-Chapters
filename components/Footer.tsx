@@ -22,8 +22,8 @@ const Footer = () => {
             <div className="flex items-center gap-2">
               <MailIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               <span>
-                <a href="mailto:hello@alfiewebdev.com">
-                  hello@alfiewebdev.com
+                <a href="mailto:tariqkichawele01@gmail.com">
+                  tariqkichawele01@gmail.com
                 </a>
               </span>
             </div>
@@ -33,7 +33,7 @@ const Footer = () => {
           <h4 className="text-lg font-bold">Get in touch with the creator</h4>
           <div className="flex items-center gap-4">
             <Link
-              href="https://www.youtube.com/@alfiewebdev"
+              href="https://www.youtube.com/@sudotk"
               className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
               prefetch={false}
               target="_blank"
@@ -42,7 +42,7 @@ const Footer = () => {
               <FaYoutube className="h-6 w-6" />
             </Link>
             <Link
-              href="https://x.com/alfiewebdev"
+              href="https://x.com/_sudoTK"
               className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
               prefetch={false}
               target="_blank"
@@ -51,7 +51,7 @@ const Footer = () => {
               <XIcon className="h-6 w-6" />
             </Link>
             <Link
-              href="https://www.linkedin.com/in/alfie-fort-39ba19264/"
+              href="https://www.linkedin.com/in/tariq-kichawele"
               className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
               prefetch={false}
               target="_blank"
@@ -65,7 +65,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 md:px-6 mt-8">
         <div className="flex flex-col md:flex-row items-center justify-between border-t border-gray-200 pt-4 dark:border-gray-700">
           <p className="text-gray-500 dark:text-gray-400">
-            &copy; 2024 YouTubeToChapters. All rights reserved.
+            &copy; {new Date().getFullYear()} YouTubeToChapters. All rights reserved.
           </p>
           <p className="text-gray-500 dark:text-gray-400">
             Designed and developed by{" "}

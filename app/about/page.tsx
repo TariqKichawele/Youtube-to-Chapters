@@ -2,7 +2,7 @@ import Header from '@/components/Header'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import React from 'react'
 import Image from 'next/image'
-import { ChevronRightCircleIcon } from 'lucide-react'
+import { Linkedin } from 'lucide-react'
 
 const About = () => {
   return (
@@ -33,19 +33,33 @@ const About = () => {
     </div>
     <div className="bg-primary/5 p-6 rounded-lg mt-8">
         <h2 className="text-2xl font-semibold mb-4 flex items-center">
-          About AlfieWebDev
+          About Tariq Kichawele
         </h2>
         <p className="text-muted-foreground leading-relaxed">
-          AlfieWebDev is a YouTube channel that creates educational content
-          with a focus on web dev.
+          I&apos;m a full-stack developer based in Raleigh, NC. I build web and mobile
+          applications with clean code and strong user experiences. I graduated from UNC
+          Charlotte with a B.S. in Public Health, then moved into tech—starting as a
+          backend developer at Revature (Java, Spring Boot, PostgreSQL) and later
+          working at Scale AI on AI-generated code evaluation and training data. More
+          about my background, stack, and projects is on{' '}
+          <a
+            href="https://tariqk.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary font-medium underline underline-offset-4 hover:opacity-90"
+          >
+            my portfolio
+          </a>
+          .
         </p>
         <a
-          href="https://www.youtube.com/watch?v=8gTcz4Y75kg"
+          href="https://www.linkedin.com/in/tariq-kichawele"
           target="_blank"
+          rel="noopener noreferrer"
           className="mt-4 inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
         >
-          Watch the development journey
-          <ChevronRightCircleIcon className="w-4 h-4 ml-2" />
+          Connect on LinkedIn
+          <Linkedin className="w-4 h-4 ml-2" />
         </a>
       </div>
   </MaxWidthWrapper>

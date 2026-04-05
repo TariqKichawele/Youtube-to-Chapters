@@ -52,14 +52,14 @@ const Contact = () => {
             icon={Twitter}
             title="Follow on X"
             content="Stay updated with our latest news and announcements"
-            href="https://x.com/alfiewebdev"
+            href="https://x.com/_sudoTK"
           />
 
           <ContactItem
             icon={Linkedin}
             title="Connect on LinkedIn"
             content="Connect with me professionally on LinkedIn"
-            href="https://www.linkedin.com/in/alfie-fort-39ba19264/"
+            href="https://www.linkedin.com/in/tariq-kichawele"
           />
 
           <ContactItem
