@@ -1,57 +1,93 @@
-'use client'
+"use client";
 
-import { ChapterSet } from '@prisma/client'
-import React, { useEffect, useState } from 'react'
-import { FaSadTear } from 'react-icons/fa';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-import { 
-    Pagination, 
-    PaginationNext, 
-    PaginationContent, 
-    PaginationPrevious, 
-    PaginationItem, 
-    PaginationLink 
-} from './ui/pagination';
-import { Copy, Check } from 'lucide-react';
-import { Button } from './ui/button';
-import Clipboard from 'clipboard';
+import { ChapterSet } from "@prisma/client";
+import React, { useEffect, useState } from "react";
+import { FaSadTear } from "react-icons/fa";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+import {
+  Pagination,
+  PaginationNext,
+  PaginationContent,
+  PaginationPrevious,
+  PaginationItem,
+  PaginationLink,
+} from "./ui/pagination";
+import { Copy, Check, Trash2 } from "lucide-react";
+import { Button } from "./ui/button";
+import Clipboard from "clipboard";
+import { deleteChapterSet } from "@/app/dashboard/actions";
+import { useRouter } from "next/navigation";
 
 interface ChapterWrapperProps {
-    user: {
-        savedChapters: ChapterSet[];
-        stripe_customer_id: string;
-    }
+  user: {
+    savedChapters: ChapterSet[];
+    stripe_customer_id: string;
+  };
 }
 
-const ITEMS_PER_PAGE = 9
+const ITEMS_PER_PAGE = 9;
 
 const ChaptersWrapper = ({ user }: ChapterWrapperProps) => {
+  const router = useRouter();
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    const [ copiedId, setCopiedId ] = useState<string | null>(null);
-    const [ currentPage, setCurrentPage ] = useState<number>(1);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentChapters = user.savedChapters.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(user.savedChapters.length / ITEMS_PER_PAGE);
 
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-    const endIndex = startIndex + ITEMS_PER_PAGE
-    const currentChapters = user.savedChapters.slice(startIndex, endIndex)
-    const totalPages = Math.ceil(user.savedChapters.length / ITEMS_PER_PAGE);
+  useEffect(() => {
+    if (user.savedChapters.length === 0) {
+      setCurrentPage(1);
+      return;
+    }
+    const lastPage = Math.ceil(user.savedChapters.length / ITEMS_PER_PAGE);
+    if (currentPage > lastPage) {
+      setCurrentPage(lastPage);
+    }
+  }, [user.savedChapters.length, currentPage]);
 
-    const clipboard = new Clipboard('.btn-copy');
+  const handleDelete = async (chapterId: string) => {
+    if (!confirm("Delete this chapter generation? This cannot be undone.")) {
+      return;
+    }
+    setDeletingId(chapterId);
+    try {
+      const result = await deleteChapterSet(chapterId);
+      if (result.success) {
+        router.refresh();
+      } else {
+        alert(result.error ?? "Failed to delete");
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
-    useEffect(() => {
-        clipboard.on('success', (e) => {
-            setCopiedId(e.trigger.id);
-            setTimeout(() => {
-                setCopiedId(null);
-            }, 2000);
-            e.clearSelection();
-        });
+  const clipboard = new Clipboard(".btn-copy");
 
-        return () => clipboard.destroy();
-    }, []);
+  useEffect(() => {
+    clipboard.on("success", (e) => {
+      setCopiedId(e.trigger.id);
+      setTimeout(() => {
+        setCopiedId(null);
+      }, 2000);
+      e.clearSelection();
+    });
 
-    useEffect(() => {
-        const style = document.createElement('style');
-        style.textContent = `
+    return () => clipboard.destroy();
+  }, []);
+
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
         .custom-scrollbar::-webkit-scrollbar {
             width: 8px;
         }
@@ -67,11 +103,11 @@ const ChaptersWrapper = ({ user }: ChapterWrapperProps) => {
             background: #555;
         }
         `;
-        document.head.appendChild(style);
-        return () => {
-            document.head.removeChild(style);
-        }
-    }, [])
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   return (
     <div className="mt-12 min-h-screen">
@@ -98,39 +134,66 @@ const ChaptersWrapper = ({ user }: ChapterWrapperProps) => {
               </h2>
               <div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar pr-2 pb-1">
                 {chapter.content.map((line: string, index: number) => (
-                  <p key={index} className="text-sm text-gray-600 leading-relaxed mb-1.5 last:mb-0">
+                  <p
+                    key={index}
+                    className="text-sm text-gray-600 leading-relaxed mb-1.5 last:mb-0"
+                  >
                     {line}
                   </p>
                 ))}
               </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      className={`mt-4 w-full shrink-0 flex justify-center items-center space-x-2 btn-copy ${
-                        copiedId === chapter.id ? "bg-green-500" : ""
-                      }`}
-                      variant={"outline"}
-                      id={chapter.id}
-                      data-clipboard-text={chapter.content.join("\n")}
-                    >
-                      {copiedId === chapter.id ? (
-                        <Check className="w-5 h-5" />
-                      ) : (
-                        <Copy className="w-5 h-5" />
-                      )}
-                      <span>{copiedId === chapter.id ? "Copied" : "Copy"}</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {copiedId === chapter.id
-                        ? "Copied To Clipboard!"
-                        : "Copy chapters to clipboard!"}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <div className="mt-4 flex gap-2 shrink-0 items-stretch">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className={`flex-1 flex justify-center items-center space-x-2 btn-copy ${
+                          copiedId === chapter.id ? "bg-green-500" : ""
+                        }`}
+                        variant={"outline"}
+                        id={chapter.id}
+                        data-clipboard-text={chapter.content.join("\n")}
+                      >
+                        {copiedId === chapter.id ? (
+                          <Check className="w-5 h-5" />
+                        ) : (
+                          <Copy className="w-5 h-5" />
+                        )}
+                        <span>
+                          {copiedId === chapter.id ? "Copied" : "Copy"}
+                        </span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {copiedId === chapter.id
+                          ? "Copied To Clipboard!"
+                          : "Copy chapters to clipboard!"}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        disabled={deletingId === chapter.id}
+                        aria-label="Delete this chapter generation"
+                        onClick={() => handleDelete(chapter.id)}
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Delete this generation</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
           ))}
         </div>
@@ -139,11 +202,13 @@ const ChaptersWrapper = ({ user }: ChapterWrapperProps) => {
         <Pagination className="mt-8">
           <PaginationContent>
             <PaginationItem>
-                <PaginationPrevious
-                    href="#"
-                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                    className={ currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                />
+              <PaginationPrevious
+                href="#"
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                className={
+                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                }
+              />
             </PaginationItem>
             {[...Array(totalPages)].map((_, index) => (
               <PaginationItem key={index}>
@@ -156,17 +221,23 @@ const ChaptersWrapper = ({ user }: ChapterWrapperProps) => {
               </PaginationItem>
             ))}
             <PaginationItem>
-                <PaginationNext
-                    href="#"
-                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                />
+              <PaginationNext
+                href="#"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
             </PaginationItem>
           </PaginationContent>
         </Pagination>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ChaptersWrapper
+export default ChaptersWrapper;

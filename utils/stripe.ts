@@ -8,6 +8,9 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: '2024-09-30.acacia'
 });
 
+export const FREE_TIER_MONTHLY_GENERATIONS = 5;
+export const PRO_TIER_PERIOD_GENERATIONS = 40;
+
 interface StripeSubscription {
     status: string;
     current_period_start: number;
@@ -192,7 +195,9 @@ export async function checkChapterCreationEligibilty(): Promise<{
     });
 
     // Determine the limit of chapter generations based on subscription status
-    const limit = isSubscribed ? 40 : 10;
+    const limit = isSubscribed
+        ? PRO_TIER_PERIOD_GENERATIONS
+        : FREE_TIER_MONTHLY_GENERATIONS;
     const remainingGenerations = Math.max(0, limit - chapterGenerationCount); // Calculate remaining generations
 
     // If no remaining generations, prepare a message for the user
