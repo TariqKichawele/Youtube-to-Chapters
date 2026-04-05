@@ -18,8 +18,10 @@ import prisma from '@/lib/prisma';
 import {
     createCheckoutLink,
     createCustomerIfNull,
+    FREE_TIER_MONTHLY_GENERATIONS,
     generateCustomerPortalLink,
-    hasSubscription
+    hasSubscription,
+    PRO_TIER_PERIOD_GENERATIONS,
 } from '@/utils/stripe';
 
 const pricingOptions = [
@@ -27,7 +29,10 @@ const pricingOptions = [
         title: "Free",
         price: "$0",
         description: "Perfect for getting started",
-        features: ["10 chapter generations per month", "Basic support"],
+        features: [
+            `${FREE_TIER_MONTHLY_GENERATIONS} chapter generations per month`,
+            "Basic support",
+        ],
         limitations: ["No access to premium features"],
         buttonText: "Get started",
         popular: false,
@@ -36,7 +41,10 @@ const pricingOptions = [
         title: "Pro plan",
         price: "$5",
         description: "For regular uploaders",
-        features: ["40 chapter generations per month", "Priority support"],
+        features: [
+            `${PRO_TIER_PERIOD_GENERATIONS} chapter generations per month`,
+            "Priority support",
+        ],
         limitations: [],
         buttonText: "Upgrade now",
         popular: true,

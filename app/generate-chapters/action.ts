@@ -8,6 +8,7 @@ import { parseXMLContent } from "@/utils/parsing";
 import { generateChaptersWithAI } from "@/utils/openai";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { checkChapterCreationEligibilty } from "@/utils/stripe";
 
 type GenerateChaptersResponse = {
     success: boolean;
@@ -34,6 +35,11 @@ export async function generateChapters(formData: FormData): Promise<GenerateChap
     });
     if(!userDB) {
         return { success: false, error: "User not found" }
+    }
+
+    const eligibility = await checkChapterCreationEligibilty();
+    if (!eligibility.isEligible) {
+        return { success: false, error: eligibility.message.trim() }
     }
 
     const link = formData.get("link") as string;
