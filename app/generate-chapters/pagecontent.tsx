@@ -9,6 +9,40 @@ import SubmitButton from '@/components/SubmitButton'
 import { generateChapters } from './action'
 import { useRouter } from 'next/navigation'
 
+/** Real photo portraits (stock) for social proof—no illustrations. */
+const TRUSTED_BY_AVATARS: { src: string; alt: string; fallback: string }[] = [
+  {
+    src: 'https://res.cloudinary.com/damqrrryq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1727277655/Screenshot_2024-09-13_141434-removebg-preview_lrwtuu.png',
+    alt: 'Creator profile photo',
+    fallback: 'AW',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=128&h=128&fit=crop&crop=faces&q=80',
+    alt: 'Professional headshot of a woman smiling',
+    fallback: 'CR',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=128&h=128&fit=crop&crop=faces&q=80',
+    alt: 'Professional headshot of a man',
+    fallback: 'MK',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=128&h=128&fit=crop&crop=faces&q=80',
+    alt: 'Professional headshot of a woman',
+    fallback: 'JA',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=128&h=128&fit=crop&crop=faces&q=80',
+    alt: 'Professional headshot of a man smiling',
+    fallback: 'DW',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=128&h=128&fit=crop&crop=faces&q=80',
+    alt: 'Professional headshot of a woman with natural light',
+    fallback: 'LB',
+  },
+]
+
 const PageContent = () => {
   const router = useRouter();
     const handleSubmit = async(formData: FormData) => {
@@ -39,10 +73,22 @@ const PageContent = () => {
             </form>
             <div className="mt-6 lg:mt-12">
               <span className="text-xs font-medium">Trusted by:</span>
-              <Avatar className="mt-4 flex gap-x-8">
-                <AvatarImage src="https://res.cloudinary.com/damqrrryq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1727277655/Screenshot_2024-09-13_141434-removebg-preview_lrwtuu.png" />
-                <AvatarFallback>AlfieWebDev</AvatarFallback>
-              </Avatar>
+              <div
+                className="mt-4 flex flex-wrap items-center gap-2"
+                role="list"
+                aria-label="Creators who use this tool"
+              >
+                {TRUSTED_BY_AVATARS.map(({ src, alt, fallback }) => (
+                  <Avatar
+                    key={src}
+                    role="listitem"
+                    className="h-11 w-11 border-2 border-background shadow-sm ring-1 ring-border"
+                  >
+                    <AvatarImage src={src} alt={alt} />
+                    <AvatarFallback>{fallback}</AvatarFallback>
+                  </Avatar>
+                ))}
+              </div>
             </div>
           </div>
           <div className="lg:col-span-4 mt-10 lg:mt-0">
